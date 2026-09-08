@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Ingreso Clínico')}"></head>
+<body>
+    <div class="ml-auth">
+        <div class="ml-auth__card">
+            <div class="ml-auth__brand">
+                <span class="ml-brand__mark" aria-hidden="true" style="width:46px;height:46px;border-radius:14px;">
+                    <svg width="27" height="27" viewBox="0 0 64 64">
+                        <path d="M10 20h44l-5 30H15z" fill="currentColor"/>
+                        <path d="M8 18h48v7H8zM29 5h7v19h-7z" fill="currentColor"/>
+                        <circle cx="39" cy="13" r="5" fill="currentColor"/>
+                    </svg>
+                </span>
+                <span class="ml-brand__text"><strong>Magistral</strong><span>Lab</span></span>
+                <span class="ml-auth__eyebrow">Farmacia clínica</span>
+            </div>
+
+            <h1>Ingreso Clínico</h1>
+            <p class="ml-auth__sub">Acceda a su portal de formulación magistral</p>
+
+            <div class="alert alert-danger py-2" th:if="${param.error}" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Correo o contraseña incorrectos.
+            </div>
+            <div class="alert alert-success py-2" th:if="${param.logout}" role="status">
+                <i class="bi bi-check-circle-fill me-1"></i> Sesión cerrada correctamente.
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Correo Electrónico</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope" aria-hidden="true"></i></span>
+                        <input class="form-control" id="username" name="username" type="email"
+                               placeholder="ejemplo@magistrallab.cl" autocomplete="username" required autofocus>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock" aria-hidden="true"></i></span>
+                        <input class="form-control" id="password" name="password" type="password"
+                               placeholder="Ingrese su contraseña" autocomplete="current-password" required>
+                        <button class="input-group-text" type="button" id="toggle-pw" aria-label="Mostrar u ocultar contraseña">
+                            <i class="bi bi-eye" id="toggle-pw-icon" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-end mb-3">
+                    <a href="#" class="ml-auth__link"
+                       onclick="alert('Contacte al administrador del sistema para restablecer su contraseña.');return false;">¿Olvidé mi contraseña?</a>
+                </div>
+
+                <button class="btn btn-primary w-100 py-2" type="submit">
+                    <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Iniciar Sesión
+                </button>
+            </form>
+
+            <p class="ml-auth__foot">
+                ¿No tiene cuenta médica?
+                <a href="#" class="ml-auth__link"
+                   onclick="alert('Solicite el acceso con el administrador de MagistralLab.');return false;">Solicitar Acceso</a>
+            </p>
+        </div>
+
+        <div class="ml-auth__note">
+            <i class="bi bi-shield-lock" aria-hidden="true"></i>
+            Conexión encriptada con estándares de seguridad de la farmacopea chilena
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var btn = document.getElementById('toggle-pw');
+            var input = document.getElementById('password');
+            var icon = document.getElementById('toggle-pw-icon');
+            if (btn && input && icon) {
+                btn.addEventListener('click', function () {
+                    var show = input.type === 'password';
+                    input.type = show ? 'text' : 'password';
+                    icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Fórmulas Magistrales')}"></head>
+<body>
+    <div class="ml-layout">
+        <aside th:replace="~{fragments :: sidebar('formulas')}"></aside>
+        <div class="ml-main">
+                <header th:replace="~{fragments :: topbar('Fórmulas Magistrales')}"></header>
+
+                <main class="ml-content">
+                    <!-- Mensajes Flash -->
+                    <div class="alert alert-success alert-dismissible fade show" role="status" th:if="${mensaje}">
+                        <i class="bi bi-check-circle-fill me-2"></i><span th:text="${mensaje}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${error}">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+
+                    <!-- Encabezado de la página -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 ml-page-head">
+                        <div>
+                            <span class="ml-eyebrow">Producción y recetas</span>
+                            <h1>Fórmulas Magistrales</h1>
+                            <p>Consulta y organiza el recetario de fórmulas y sus indicaciones.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary" data-new-modal>
+                            <i class="bi bi-plus-circle me-1" aria-hidden="true"></i> Nueva fórmula
+                        </button>
+                    </div>
+
+                    <!-- Tabla de Fórmulas -->
+                    <section class="card shadow-sm border-0 p-3 table-responsive">
+                        <p class="text-muted p-3 mb-0" th:if="${#lists.isEmpty(formulas)}">
+                            Todavía no hay fórmulas magistrales registradas. Haz clic en "Nueva fórmula" para agregar una.
+                        </p>
+                        <table class="table table-hover align-middle mb-0" th:unless="${#lists.isEmpty(formulas)}">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre de la Fórmula</th>
+                                    <th>Presentación</th>
+                                    <th>Cliente Destinatario</th>
+                                    <th>Estado</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${formulas}">
+                                    <td class="fw-semibold" th:text="${item.id}"></td>
+                                    <td class="fw-medium text-dark" th:text="${item.nombre}"></td>
+                                    <td><span class="badge text-bg-light border" th:text="${item.presentacion}"></span></td>
+                                    <td>
+                                        <span th:if="${item.cliente != null}" class="text-primary fw-medium">
+                                            <i class="bi bi-person me-1"></i><span th:text="${item.cliente.nombres + ' ' + item.cliente.apellidos}"></span>
+                                        </span>
+                                        <span th:unless="${item.cliente != null}" class="text-muted fst-italic">
+                                            Fórmula general
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" th:classappend="${item.activo ? 'text-bg-success' : 'text-bg-secondary'}" th:text="${item.activo ? 'Activo' : 'Inactivo'}"></span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1 align-items-center">
+                                            <a class="btn btn-sm btn-outline-secondary" th:href="@{/formulas/{id}(id=${item.id})}" title="Ver detalles">
+                                                <i class="bi bi-eye" aria-hidden="true"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-edit-modal
+                                                    th:attr="data-id=${item.id},data-nombre=${item.nombre},data-presentacion=${item.presentacion},data-composicion=${item.composicion},data-indicaciones=${item.indicaciones},data-cliente=${item.cliente != null ? item.cliente.id : ''}"
+                                                    title="Editar fórmula">
+                                                <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                                            </button>
+                                            <form th:action="@{/formulas/{id}/estado(id=${item.id})}" method="post" class="d-inline">
+                                                <button class="btn btn-sm"
+                                                        th:classappend="${item.activo ? 'btn-outline-warning' : 'btn-outline-success'}"
+                                                        th:title="${item.activo ? 'Deshabilitar fórmula' : 'Habilitar fórmula'}">
+                                                    <i class="bi" th:classappend="${item.activo ? 'bi-toggle-on' : 'bi-toggle-off'}"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <!-- Modal Crear / Editar Fórmula -->
+                    <div class="modal fade" tabindex="-1" aria-hidden="true" id="editor-modal" aria-labelledby="modal-title"
+                         th:attr="data-auto-open=${abrirModal}" data-create-title="Nueva fórmula magistral" data-edit-title="Editar fórmula magistral">
+                        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content border-0 shadow">
+                                <div class="modal-header bg-success text-white">
+                                    <h2 class="modal-title fs-5" id="modal-title" th:text="${formula.id == null ? 'Nueva fórmula magistral' : 'Editar fórmula magistral'}"></h2>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <form class="modal-form d-flex flex-column overflow-hidden" th:action="@{/formulas/guardar}" th:object="${formula}" method="post">
+                                    <div class="modal-body">
+                                        <input type="hidden" th:field="*{id}">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold small">Nombre de la Fórmula</label>
+                                                <input class="form-control" th:field="*{nombre}" maxlength="120" placeholder="Ej. Crema Hidratante con Urea al 10%" required>
+                                                <span class="error-text text-danger small d-block" th:errors="*{nombre}"></span>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold small">Presentación Farmacéutica</label>
+                                                <input class="form-control" th:field="*{presentacion}" maxlength="100" placeholder="Ej. Frasco 100g / Pomada / Gotero" required>
+                                                <span class="error-text text-danger small d-block" th:errors="*{presentacion}"></span>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <label class="form-label fw-semibold small">Cliente Asociado (Opcional)</label>
+                                                <select class="form-select" th:field="*{cliente}">
+                                                    <option value="">-- Fórmula general (sin cliente asignado) --</option>
+                                                    <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.dni + ' — ' + c.nombres + ' ' + c.apellidos}"></option>
+                                                </select>
+                                                <span class="error-text text-danger small d-block" th:errors="*{cliente}"></span>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <label class="form-label fw-semibold small">Composición / Principios Activos</label>
+                                                <textarea class="form-control" th:field="*{composicion}" rows="4" maxlength="4000" placeholder="Detalla los insumos, porcentajes o concentraciones..." required></textarea>
+                                                <span class="error-text text-danger small d-block" th:errors="*{composicion}"></span>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <label class="form-label fw-semibold small">Modo de Uso / Indicaciones Médicas</label>
+                                                <textarea class="form-control" th:field="*{indicaciones}" rows="3" maxlength="4000" placeholder="Instrucciones para el paciente, vía de administración..." required></textarea>
+                                                <span class="error-text text-danger small d-block" th:errors="*{indicaciones}"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer bg-light">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-check-lg me-1" aria-hidden="true"></i> Guardar fórmula
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+
+                <footer class="ml-foot">Sistema de Gestión de Fórmulas Magistrales · MagistralLab &copy; 2026</footer>
+        </div>
+    </div>
+
+    <th:block th:replace="~{fragments :: scripts}"></th:block>
+</body>
+</html>

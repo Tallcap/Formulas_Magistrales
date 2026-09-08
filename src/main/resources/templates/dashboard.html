@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Inicio')}"></head>
+<body>
+    <div class="ml-layout">
+        <aside th:replace="~{fragments :: sidebar('dashboard')}"></aside>
+        <div class="ml-main">
+            <header th:replace="~{fragments :: topbar('Inicio')}"></header>
+
+            <main class="ml-content">
+                <div class="ml-page-head">
+                    <h1>Dashboard</h1>
+                    <p>Bienvenido al sistema de control de fórmulas magistrales de MagistralLab.</p>
+                </div>
+
+                <!-- Indicadores KPI -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-xl-3">
+                        <div class="ml-kpi">
+                            <div class="ml-kpi__top">
+                                <span class="ml-kpi__label">Pacientes registrados</span>
+                                <span class="ml-kpi__icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                            </div>
+                            <p class="ml-kpi__value" th:text="${totalClientes}">0</p>
+                            <p class="ml-kpi__hint">Total en el sistema</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="ml-kpi">
+                            <div class="ml-kpi__top">
+                                <span class="ml-kpi__label">Fórmulas registradas</span>
+                                <span class="ml-kpi__icon"><i class="bi bi-capsule" aria-hidden="true"></i></span>
+                            </div>
+                            <p class="ml-kpi__value" th:text="${totalFormulas}">0</p>
+                            <p class="ml-kpi__hint">Recetario magistral</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="ml-kpi">
+                            <div class="ml-kpi__top">
+                                <span class="ml-kpi__label">Pacientes con fórmulas</span>
+                                <span class="ml-kpi__icon"><i class="bi bi-person-check" aria-hidden="true"></i></span>
+                            </div>
+                            <p class="ml-kpi__value" th:text="${clientesConFormulas}">0</p>
+                            <p class="ml-kpi__hint">Con receta asociada</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="ml-kpi">
+                            <div class="ml-kpi__top">
+                                <span class="ml-kpi__label">Fórmulas recientes</span>
+                                <span class="ml-kpi__icon is-warn"><i class="bi bi-clock-history" aria-hidden="true"></i></span>
+                            </div>
+                            <p class="ml-kpi__value" th:text="${#lists.size(ultimasFormulas)}">0</p>
+                            <p class="ml-kpi__hint">Últimos movimientos</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Actividad reciente -->
+                    <div class="col-lg-8">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <h2 class="h6 fw-bold mb-0">Actividad Reciente de Fórmulas</h2>
+                                    <a th:href="@{/formulas}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+                                </div>
+                                <p class="text-body-secondary small mb-0" th:if="${#lists.isEmpty(ultimasFormulas)}">
+                                    Aún no hay fórmulas registradas en el sistema.
+                                </p>
+                                <div class="table-responsive" th:unless="${#lists.isEmpty(ultimasFormulas)}">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Fórmula</th>
+                                                <th>Paciente</th>
+                                                <th>Presentación</th>
+                                                <th>Estado</th>
+                                                <th class="text-end">Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="f : ${ultimasFormulas}">
+                                                <td class="fw-semibold" th:text="${f.nombre}"></td>
+                                                <td th:text="${f.cliente != null ? f.cliente.nombres + ' ' + f.cliente.apellidos : 'Fórmula general'}"></td>
+                                                <td><span class="badge text-bg-light" th:text="${f.presentacion}"></span></td>
+                                                <td>
+                                                    <span class="badge" th:classappend="${f.activo ? 'text-bg-success' : 'text-bg-secondary'}"
+                                                          th:text="${f.activo ? 'Activa' : 'Inactiva'}"></span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/formulas/{id}(id=${f.id})}" title="Ver detalle">
+                                                        <i class="bi bi-eye" aria-hidden="true"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones rápidas -->
+                    <div class="col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-body ml-quick">
+                                <h2 class="h6 fw-bold mb-1">Acciones rápidas</h2>
+                                <p class="text-body-secondary small mb-3">Crear y agilizar registros clínicos.</p>
+                                <a class="btn btn-primary" th:href="@{/formulas/nueva}">
+                                    <i class="bi bi-capsule" aria-hidden="true"></i> Nueva fórmula
+                                </a>
+                                <a class="btn btn-primary" th:href="@{/clientes/nuevo}">
+                                    <i class="bi bi-person-plus" aria-hidden="true"></i> Nuevo paciente
+                                </a>
+                                <div class="ml-note mt-3">
+                                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                                    <span>Recuerde que toda nueva fórmula debe validarse previamente bajo el protocolo farmacéutico de MagistralLab.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="ml-foot">Sistema de Gestión de Fórmulas Magistrales · MagistralLab &copy; 2026</footer>
+        </div>
+    </div>
+
+    <th:block th:replace="~{fragments :: scripts}"></th:block>
+</body>
+</html>
