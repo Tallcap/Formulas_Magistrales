@@ -1,0 +1,24 @@
+﻿# ===================================================================
+# PLANTILLA DE CONFIGURACIÓN LOCAL PARA DESARROLLADORES
+# ===================================================================
+# Instrucciones para que el proyecto te corra en tu PC:
+# 1. Copia este archivo y renómbralo exactamente a: application-local.properties
+# 2. Ajusta tu contraseña y puerto de PostgreSQL si es necesario.
+# 3. El archivo "application-local.properties" está en .gitignore,
+#    por lo que tus contraseñas personales nunca se subirán a GitHub.
+# ===================================================================
+
+# Base de Datos PostgreSQL (Ajusta puerto 5432 o 5433 y tu contraseña)
+spring.datasource.url=jdbc:postgresql://localhost:5432/Magistral_Formulas
+spring.datasource.username=postgres
+spring.datasource.password=tu_password_aqui
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA / Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# Token de RENIEC (MiAPI Cloud)
+# Si no tienes token, pídeselo al creador del proyecto o regístrate en https://miapi.cloud
+apicloud.reniec.base-url=https://miapi.cloud/v1
+apicloud.reniec.token=tu_token_aqui

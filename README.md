@@ -350,29 +350,29 @@ CREATE DATABASE "Magistral_Formulas"
     CONNECTION LIMIT = -1;
 ```
 
-### 7.3. Archivos de Propiedades del Proyecto
-* **`application.properties` (Plantilla general):**
-  ```properties
-  spring.application.name=DWI
-  spring.config.import=optional:file:./DWI/application-local.properties,optional:file:./application-local.properties
-  
-  # Base de Datos (PostgreSQL 18 en Puerto 5433)
-  spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5433/Magistral_Formulas}
-  spring.datasource.username=${DB_USER:postgres}
-  spring.datasource.password=${DB_PASSWORD:tu_password_aqui}
-  spring.datasource.driver-class-name=org.postgresql.Driver
-  
-  # Hibernate / JPA
-  spring.jpa.hibernate.ddl-auto=update
-  spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-  spring.jpa.open-in-view=false
-  
-  # Administrador y API Externa
-  app.admin.email=${ADMIN_EMAIL:admin@gmail.com}
-  app.admin.password=${ADMIN_PASSWORD:admin123}
-  apicloud.reniec.base-url=${RENIEC_API_URL:https://miapi.cloud/v1}
-  apicloud.reniec.token=${RENIEC_API_TOKEN:tu_token_aqui}
-  ```
+### 7.3. Configuración para Colaboradores (Paso a Paso)
+
+Cuando un colaborador clona el repositorio, para que el proyecto le corra en su computadora debe seguir estos **3 pasos**:
+
+1. **Crear la Base de Datos:**
+   Ejecutar el script `bd_formulas_magistrales_postgresql.sql` en su PostgreSQL (pgAdmin o DBeaver) para crear la base de datos `Magistral_Formulas`.
+
+2. **Crear su archivo de configuración local:**
+   Copiar la plantilla `application-local.properties.example` y renombrarla como `application-local.properties`:
+   ```powershell
+   Copy-Item application-local.properties.example application-local.properties
+   ```
+
+3. **Ajustar sus credenciales en `application-local.properties`:**
+   Abrir ese archivo y colocar su propia contraseña de PostgreSQL, el puerto (`5432` o `5433`) y el token de RENIEC:
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/Magistral_Formulas
+   spring.datasource.username=postgres
+   spring.datasource.password=su_password_de_postgres
+   apicloud.reniec.token=token_compartido_o_propio
+   ```
+   *(Este archivo `application-local.properties` está en `.gitignore`, por lo que sus datos personales nunca se subirán a GitHub).*
+
 
 ### 7.4. Comandos de Compilación y Ejecución
 
