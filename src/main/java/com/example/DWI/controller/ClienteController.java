@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -71,6 +70,27 @@ public class ClienteController {
         return apiCloudService.consultar(dni);
     }
 
+    @PostMapping("/dni/{dni}")
+    public ResponseEntity<Cliente> registrarDesdeDni(@PathVariable String dni) {
+        Map<String, Object> respuesta = apiCloudService.consultar(dni);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> datos = (Map<String, Object>) respuesta.get("datos");
+        if (datos == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_GATEWAY, "ApiCloud no devolvio datos del ciudadano");
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> domicilio = (Map<String, Object>) datos.get("domiciliado");
+        Cliente cliente = new Cliente();
+        cliente.setDni(String.valueOf(datos.get("dni")));
+        cliente.setNombres(String.valueOf(datos.get("nombres")));
+        cliente.setApellidos(String.valueOf(datos.get("ape_paterno")) + " " + String.valueOf(datos.get("ape_materno")));
+        cliente.setDireccion(domicilio == null ? null : String.valueOf(domicilio.get("direccion")));
+        Cliente guardado = clienteService.guardar(null, cliente);
+        return ResponseEntity.created(URI.create("/api/clientes/" + guardado.getId())).body(guardado);
+    }
+
     @GetMapping
     public List<Cliente> listarClientes() {
         return clienteService.listar();
@@ -93,13 +113,8 @@ public class ClienteController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarCliente(@PathVariable Long id) {
-        clienteService.eliminar(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/{id}/estado")
-    public Cliente cambiarEstado(@PathVariable Long id) {
+    public Cliente eliminarCliente(@PathVariable Long id) {
         return clienteService.cambiarEstado(id);
     }
+
 }

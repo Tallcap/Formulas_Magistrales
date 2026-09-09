@@ -43,13 +43,10 @@ public class Cliente {
     @Column(nullable = false, length = 100)
     private String apellidos;
 
-    // Opcional: el cliente puede no proporcionarlo. Si se indica, debe tener
-    // 6 dígitos (teléfono fijo) o 9 dígitos (celular).
     @Pattern(regexp = "(\\d{6}|\\d{9})?", message = "El teléfono debe tener 6 dígitos (fijo) o 9 dígitos (celular)")
     @Column(length = 20)
     private String telefono;
 
-    // Opcional: puede no venir de la consulta oficial y el cliente no está obligado a darla.
     @Size(max = 250, message = "La dirección no puede superar 250 caracteres")
     @Column(length = 250)
     private String direccion;

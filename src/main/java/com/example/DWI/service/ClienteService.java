@@ -64,7 +64,7 @@ public class ClienteService {
         return clienteRepository.saveAndFlush(cliente);
     }
 
-    /** Convierte cadenas vacías o en blanco en null para los campos opcionales (teléfono y dirección). */
+    //Convierte cadenas vacías o en blanco en null para los campos opcionales (teléfono y dirección).
     private static String normalizarOpcional(String valor) {
         if (valor == null) {
             return null;
@@ -85,6 +85,13 @@ public class ClienteService {
     public Cliente cambiarEstado(Long id) {
         Cliente cliente = obtener(id);
         cliente.setActivo(!cliente.isActivo());
+        return clienteRepository.saveAndFlush(cliente);
+    }
+
+    //Baja lógica: conserva el cliente y solo lo marca como inactivo.
+    public Cliente desactivar(Long id) {
+        Cliente cliente = obtener(id);
+        cliente.setActivo(false);
         return clienteRepository.saveAndFlush(cliente);
     }
 }

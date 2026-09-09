@@ -13,10 +13,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * Servicio de integración con la nube de servicios externos (ApiCloud / RENIEC).
- * Consulta en tiempo real los datos oficiales de personas naturales a partir del DNI (8 dígitos).
- */
 @Service
 public class ApiCloudService {
 
@@ -28,8 +24,7 @@ public class ApiCloudService {
 
     public ApiCloudService(
             @Value("${apicloud.reniec.base-url:${apis.reniec.base-url:https://miapi.cloud/v1}}") String baseUrl,
-            @Value("${apicloud.reniec.token:${apis.reniec.token:}}") String apiToken
-    ) {
+            @Value("${apicloud.reniec.token:${apis.reniec.token:}}") String apiToken) {
         this.baseUrl = (baseUrl != null && !baseUrl.isBlank()) ? baseUrl.trim() : "https://miapi.cloud/v1";
         this.restClient = RestClient.builder().baseUrl(this.baseUrl).build();
         this.apiToken = apiToken != null ? apiToken.trim() : "";
@@ -38,17 +33,20 @@ public class ApiCloudService {
     @SuppressWarnings("unchecked")
     public Map<String, Object> consultar(String dni) {
         if (dni == null || !dni.matches("\\d{8}")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El DNI debe tener exactamente 8 dígitos numéricos");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El DNI debe tener exactamente 8 dígitos numéricos");
         }
 
         if (apiToken.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Configure el token de ApiCloud antes de consultar");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Configure el token de ApiCloud antes de consultar");
         }
 
         try {
             log.info("ApiCloudService: Consultando DNI {} en ApiCloud ({})", dni, baseUrl);
 
             Map<String, Object> respuesta;
+            // /dni?numero=12345678 || /dni/12345678
             if (baseUrl.contains("apis.net.pe")) {
                 respuesta = restClient.get()
                         .uri(uriBuilder -> uriBuilder
@@ -73,16 +71,20 @@ public class ApiCloudService {
             return respuesta;
         } catch (HttpClientErrorException.Unauthorized e) {
             log.error("ApiCloudService: Token de autorización inválido o vencido", e);
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "El token de ApiCloud es inválido o ha vencido");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "El token de ApiCloud es inválido o ha vencido");
         } catch (HttpClientErrorException.NotFound e) {
             log.warn("ApiCloudService: DNI {} no existe en los registros oficiales", dni);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron registros para el DNI ingresado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "No se encontraron registros para el DNI ingresado");
         } catch (RestClientResponseException e) {
             log.error("ApiCloudService: Error devuelto por el servidor remoto: {}", e.getStatusCode(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "El servicio de ApiCloud respondió con código HTTP " + e.getStatusCode().value());
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "El servicio de ApiCloud respondió con código HTTP " + e.getStatusCode().value());
         } catch (RestClientException e) {
             log.error("ApiCloudService: Error de conectividad", e);
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo establecer comunicación con ApiCloud");
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "No se pudo establecer comunicación con ApiCloud");
         }
     }
 }

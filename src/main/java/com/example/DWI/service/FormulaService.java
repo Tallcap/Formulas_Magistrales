@@ -15,6 +15,9 @@ import com.example.DWI.repository.FormulaRepository;
 @Transactional
 public class FormulaService {
 
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager em;
+
     private final FormulaRepository formulaRepository;
     private final ClienteService clienteService;
 
@@ -29,21 +32,6 @@ public class FormulaService {
     }
 
     @Transactional(readOnly = true)
-    public long contar() {
-        return formulaRepository.count();
-    }
-
-    @Transactional(readOnly = true)
-    public long contarClientesConFormulas() {
-        return formulaRepository.contarClientesConFormulas();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Formula> recientes() {
-        return formulaRepository.findTop5ByOrderByIdDesc();
-    }
-
-    @Transactional(readOnly = true)
     public Formula obtener(Long id) {
         return formulaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fórmula no encontrada"));
@@ -52,6 +40,15 @@ public class FormulaService {
     public Formula guardar(Long id, Formula datos, Long clienteId) {
         Formula formula = (id == null) ? new Formula() : obtener(id);
 
+        if (id != null) {
+            em.lock(formula, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            long lotes = em
+                    .createQuery("select count(p) from InventarioProductoFinal p where p.formula.id=:id", Long.class)
+                    .setParameter("id", id).getSingleResult();
+            if (lotes > 0)
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "La formula tiene produccion registrada; cree otra formula para modificarla");
+        }
         formula.setCliente(clienteId == null ? null : clienteService.obtener(clienteId));
         formula.setNombre(datos.getNombre());
         formula.setPresentacion(datos.getPresentacion());
@@ -59,12 +56,6 @@ public class FormulaService {
         formula.setIndicaciones(datos.getIndicaciones());
 
         return formulaRepository.saveAndFlush(formula);
-    }
-
-    public void eliminar(Long id) {
-        Formula formula = obtener(id);
-        formulaRepository.delete(formula);
-        formulaRepository.flush();
     }
 
     public Formula cambiarEstado(Long id) {

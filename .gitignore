@@ -33,8 +33,3 @@ build/
 .vscode/
 
 application-local.properties
-
-### Archivos de pruebas locales y Postman ###
-Coleccion_Postman_DWI.json
-PASO_A_PASO_PRUEBAS_POSTMAN.md
-*.postman_collection.json
